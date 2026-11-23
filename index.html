@@ -1,0 +1,2867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coforge AI Assistant - Centene DSNP Processing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --coforge-primary: #003366;
+            --coforge-secondary: #0066cc;
+            --coforge-accent: #ff6600;
+            --coforge-light: #e6f2ff;
+            --coforge-gray: #f5f7fa;
+            --coforge-dark-gray: #6c757d;
+            --coforge-success: #28a745;
+            --coforge-warning: #ffc107;
+            --coforge-danger: #dc3545;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--coforge-primary) 0%, var(--coforge-secondary) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 1400px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 51, 102, 0.3);
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: var(--coforge-gray);
+            border-right: 1px solid #e0e6ed;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            background: var(--coforge-primary);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .stats-section {
+            padding: 20px;
+            border-bottom: 1px solid #e0e6ed;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--coforge-secondary);
+        }
+
+        .stat-card h3 {
+            font-size: 24px;
+            color: var(--coforge-primary);
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .stat-card p {
+            font-size: 11px;
+            color: var(--coforge-dark-gray);
+            font-weight: 500;
+        }
+
+        .audit-log-section {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .audit-log-section h3 {
+            color: var(--coforge-primary);
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .export-button {
+            background: var(--coforge-success);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-button:hover {
+            background: #1e7e34;
+            transform: translateY(-1px);
+        }
+
+        .bot-log-table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .bot-log-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+        }
+
+        .bot-log-table th {
+            background: var(--coforge-primary);
+            color: white;
+            padding: 8px 6px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .bot-log-table td {
+            padding: 8px 6px;
+            border-bottom: 1px solid #f0f0f0;
+            word-wrap: break-word;
+            max-width: 150px;
+        }
+
+        .bot-log-table tr:hover {
+            background: var(--coforge-light);
+        }
+
+        .members-section {
+            padding: 20px;
+            border-bottom: 1px solid #e0e6ed;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .members-section::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .members-section::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .members-section::-webkit-scrollbar-thumb {
+            background: var(--coforge-secondary);
+            border-radius: 3px;
+        }
+
+        .members-section::-webkit-scrollbar-thumb:hover {
+            background: var(--coforge-primary);
+        }
+
+        .members-section h3 {
+            color: var(--coforge-primary);
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .member-card {
+            background: white;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .member-card:hover {
+            border-color: var(--coforge-secondary);
+            transform: translateX(5px);
+        }
+
+        .member-card.active {
+            border-color: var(--coforge-accent);
+            background: var(--coforge-light);
+        }
+
+        .member-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .member-details h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--coforge-primary);
+            margin-bottom: 2px;
+        }
+
+        .member-details p {
+            font-size: 11px;
+            color: var(--coforge-dark-gray);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+        }
+
+        .status-pending { background: var(--coforge-dark-gray); }
+        .status-processing { background: var(--coforge-warning); animation: pulse 2s infinite; }
+        .status-updated { background: var(--coforge-success); }
+        .status-error { background: var(--coforge-danger); }
+        .status-validated { background: var(--coforge-secondary); }
+        .status-email-sent { background: var(--coforge-accent); }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, var(--coforge-primary) 0%, var(--coforge-secondary) 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header-info h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .chat-header-info p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .coforge-logo {
+            background: white;
+            color: var(--coforge-primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: linear-gradient(to bottom, #ffffff 0%, var(--coforge-gray) 100%);
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .bot-avatar {
+            background: linear-gradient(135deg, var(--coforge-secondary) 0%, var(--coforge-primary) 100%);
+            margin-right: 15px;
+        }
+
+        .user-avatar {
+            background: linear-gradient(135deg, var(--coforge-accent) 0%, #ff8533 100%);
+            margin-left: 15px;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 16px 20px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: var(--coforge-primary);
+            border: 1px solid #e0e6ed;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, var(--coforge-secondary) 0%, var(--coforge-primary) 100%);
+            color: white;
+        }
+
+        .api-simulation-card {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+            color: white;
+        }
+
+        .api-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .api-header h4 {
+            margin-left: 10px;
+            font-weight: 600;
+        }
+
+        .api-step {
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+            font-size: 13px;
+        }
+
+        .api-step-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            background: rgba(255,255,255,0.3);
+        }
+
+        .api-step.complete .api-step-icon {
+            background: rgba(255,255,255,0.9);
+            color: #28a745;
+        }
+
+        .api-step.processing .api-step-icon {
+            background: #ffc107;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        .processing-card {
+            background: var(--coforge-light);
+            border: 2px solid var(--coforge-secondary);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .processing-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .processing-header h4 {
+            color: var(--coforge-primary);
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .processing-step {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e6ed;
+        }
+
+        .processing-step:last-child {
+            border-bottom: none;
+        }
+
+        .step-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .step-pending { background: var(--coforge-dark-gray); }
+        .step-processing { background: var(--coforge-warning); animation: pulse 2s infinite; }
+        .step-complete { background: var(--coforge-success); }
+        .step-error { background: var(--coforge-danger); }
+        .step-email { background: var(--coforge-accent); }
+
+        .comparison-table {
+            background: white;
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .comparison-header {
+            background: var(--coforge-primary);
+            color: white;
+            padding: 10px 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .comparison-content {
+            overflow-x: auto;
+        }
+
+        .comparison-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .comparison-content th,
+        .comparison-content td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .comparison-content th {
+            background: var(--coforge-gray);
+            font-weight: 600;
+        }
+
+        .mismatch-highlight {
+            background: #fff3cd !important;
+            color: #856404;
+            font-weight: bold;
+        }
+
+        .match-highlight {
+            background: #d4edda !important;
+            color: #155724;
+        }
+
+        .change-highlight {
+            background: linear-gradient(90deg, #ff6600, #ffcc99);
+            color: white;
+            font-weight: bold;
+            animation: changeGlow 2s ease-out;
+        }
+
+        @keyframes changeGlow {
+            0% { box-shadow: 0 0 10px #ff6600; }
+            100% { box-shadow: none; }
+        }
+
+        .rule-execution-card {
+            background: white;
+            border: 2px solid var(--coforge-secondary);
+            border-radius: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .rule-header {
+            background: var(--coforge-secondary);
+            color: white;
+            padding: 10px 15px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .rule-content {
+            padding: 15px;
+            font-size: 12px;
+        }
+
+        .rule-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .rule-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .rule-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .rule-email {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .email-draft-card {
+            background: #f8f9fa;
+            border: 2px solid var(--coforge-accent);
+            border-radius: 12px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .email-draft-header {
+            background: var(--coforge-accent);
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+        }
+
+        .email-draft-content {
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        .email-field {
+            margin-bottom: 10px;
+            display: flex;
+        }
+
+        .email-label {
+            font-weight: bold;
+            width: 60px;
+            color: var(--coforge-primary);
+        }
+
+        .email-value {
+            color: #333;
+        }
+
+        .email-body {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            margin-top: 15px;
+        }
+
+        .chat-input-area {
+            padding: 20px 30px;
+            background: white;
+            border-top: 1px solid #e0e6ed;
+        }
+
+        .suggestion-pills {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .suggestion-pill {
+            background: var(--coforge-light);
+            color: var(--coforge-secondary);
+            border: 2px solid var(--coforge-secondary);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .suggestion-pill:hover {
+            background: var(--coforge-secondary);
+            color: white;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e6ed;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: var(--coforge-gray);
+        }
+
+        .chat-input input:focus {
+            border-color: var(--coforge-secondary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+        }
+
+        .send-button {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, var(--coforge-secondary) 0%, var(--coforge-primary) 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 102, 204, 0.3);
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            margin-left: 15px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--coforge-secondary);
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        .results-summary {
+            background: linear-gradient(135deg, var(--coforge-success) 0%, #20c997 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .results-summary h4 {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .results-list {
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .before-after-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .before-after-card {
+            background: white;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .before-after-card.before {
+            border-color: var(--coforge-danger);
+        }
+
+        .before-after-card.after {
+            border-color: var(--coforge-success);
+        }
+
+        .before-after-header {
+            padding: 10px 15px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .before-after-card.before .before-after-header {
+            background: var(--coforge-danger);
+            color: white;
+        }
+
+        .before-after-card.after .before-after-header {
+            background: var(--coforge-success);
+            color: white;
+        }
+
+        .before-after-content {
+            padding: 15px;
+            font-size: 12px;
+        }
+
+        .field-change {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .field-change:last-child {
+            border-bottom: none;
+        }
+
+        .field-label {
+            font-weight: 600;
+            color: var(--coforge-primary);
+        }
+
+        .field-value {
+            color: var(--coforge-dark-gray);
+        }
+
+        .awaiting-response {
+            background: var(--coforge-warning);
+            color: #856404;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                height: 95vh;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-height: 300px;
+            }
+            
+            .members-section {
+                display: none;
+            }
+
+            .before-after-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>DSNP AI Assistant</h2>
+                <p>Agentic AI Processing Engine</p>
+            </div>
+            
+            <div class="stats-section">
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <h3 id="totalMembers">0</h3>
+                        <p>Total Cases</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="processedMembers">0</h3>
+                        <p>Processed</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="emailsSent">0</h3>
+                        <p>Emails Sent</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="updatedMembers">0</h3>
+                        <p>Updated</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="members-section">
+                <h3>Member Cases</h3>
+                <div id="membersList">
+                    <!-- Member cards will be populated here -->
+                </div>
+            </div>
+
+            <div class="audit-log-section">
+                <h3>
+                    Agent Processing Log
+                    <button class="export-button" onclick="exportToExcel()">📊 Export Excel</button>
+                </h3>
+                <div class="bot-log-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Basic Match</th>
+                                <th>Email</th>
+                                <th>Eligibility</th>
+                                <th>DSNP</th>
+                                <th>Screenshot</th>
+                                <th>Comment</th>
+                            </tr>
+                        </thead>
+                        <tbody id="botLogTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <h1>Centene DSNP Processing</h1>
+                    <p>AI-powered agentic validation engine</p>
+                </div>
+                <div class="coforge-logo">COFORGE</div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    <div class="message-avatar bot-avatar">AI</div>
+                    <div class="message-content">
+                        <strong>Welcome to Coforge's Enhanced Agentic AI DSNP Assistant! 🚀</strong><br><br>
+                        I'm an intelligent agent that understands and executes business rules autonomously. Here's what I can do:
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li><strong>🔌 SNP Data Loading:</strong> Connect to SNP database via API</li>
+                            <li><strong>🤖 Intelligent Processing:</strong> Understand and execute complex business rules</li>
+                            <li><strong>📧 Email Drafts:</strong> Generate complete email notifications</li>
+                            <li><strong>📊 Excel Export:</strong> Export processing logs to Excel</li>
+                            <li><strong>🔍 Detailed Logging:</strong> Specific mismatch details in comments</li>
+                            <li><strong>⚡ Batch Processing:</strong> Complete audit trails for all members</li>
+                        </ul>
+                        <strong>🎯 Getting Started:</strong><br>
+                        ✨ <strong>First Step:</strong> Click "Load from SNP" to connect to the database<br>
+                        ✨ <strong>API Integration:</strong> Watch realistic API connection simulation<br>
+                        ✨ <strong>Agentic Processing:</strong> AI understands and executes business rules<br>
+                        ✨ <strong>Compliance Ready:</strong> Full audit trail and email notifications<br><br>
+                        
+                        <div style="background: var(--coforge-warning); color: #856404; padding: 12px; border-radius: 8px; margin-top: 15px; text-align: center; font-weight: 600;">
+                            📋 No data loaded yet. Please click "Load from SNP" to begin!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="message-avatar bot-avatar">AI</div>
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+            
+            <div class="chat-input-area">
+                <div class="suggestion-pills">
+                    <button class="suggestion-pill" onclick="loadFromSNP()" id="loadSNPBtn">🔌 Load from SNP</button>
+                    <button class="suggestion-pill" onclick="processSelectedMember()" id="processBtn" disabled style="opacity: 0.5;">Process Selected</button>
+                    <button class="suggestion-pill" onclick="validateAllCases()" id="validateBtn" disabled style="opacity: 0.5;">Validate All Members</button>
+                    <button class="suggestion-pill" onclick="findMismatches()" id="findBtn" disabled style="opacity: 0.5;">Find Data Issues</button>
+                    <button class="suggestion-pill" onclick="showBusinessRules()">Show Business Rules</button>
+                </div>
+                
+                <div class="chat-input">
+                    <input type="text" id="userInput" placeholder="Type 'Load from SNP' to connect to the database and begin processing..." onkeypress="handleKeyPress(event)">
+                    <button class="send-button" onclick="sendMessage()">
+                        <span>Send</span>
+                        <span>➤</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // SNP Data - will be loaded via API simulation
+        let snpData = [];
+        
+        // Master data that will be loaded when "Load from SNP" is executed
+        const masterSnpData = [
+            {medicaidNo: "5289671219", memberName: "ABDULL GHANI", dob: "12-05-1980", dsnpCode: "FBDE", state: "KY", planCode: "521-014-001", correctedMedicaidNo: "NA", comment: "", status: "pending"},
+            {medicaidNo: "5289671228", memberName: "MARIA LOPEZ", dob: "03-11-1975", dsnpCode: "SLMB", state: "ME", planCode: "521-014-002", correctedMedicaidNo: "NA", comment: "", status: "pending"},
+            {medicaidNo: "5289671237", memberName: "JOHN SMITH", dob: "21-07-1990", dsnpCode: "QMB", state: "SC", planCode: "521-014-003", correctedMedicaidNo: "NA", comment: "", status: "pending"},
+            {medicaidNo: "5289671246", memberName: "LISA WONG", dob: "15-03-1985", dsnpCode: "QMB+", state: "MI", planCode: "521-014-004", correctedMedicaidNo: "NA", comment: "", status: "pending"},
+            {medicaidNo: "5289671255", memberName: "DAVID BROWN", dob: "30-09-1992", dsnpCode: "QI", state: "NY", planCode: "521-014-005", correctedMedicaidNo: "NA", comment: "", status: "pending"},
+            {medicaidNo: "5289671264", memberName: "AMY JOHNSON", dob: "25-12-1988", dsnpCode: "SLMB+", state: "NC", planCode: "521-014-006", correctedMedicaidNo: "NA", comment: "", status: "pending"},
+            {medicaidNo: "5289671263", memberName: "BECKY JOHNSON", dob: "25-12-1987", dsnpCode: "No Medicaid", state: "IN", planCode: "521-014-007", correctedMedicaidNo: "NA", comment: "As No Medicaid", status: "pending"},
+            {medicaidNo: "5289671265", memberName: "RACHEL MESSMER", dob: "24-12-1989", dsnpCode: "QMB+", state: "MI", planCode: "521-014-004", correctedMedicaidNo: "5289671269", comment: "", status: "pending"}
+        ];
+
+        let dataLoaded = false;
+
+        const passportData = [
+            {medicaidNo: "5289671219", state: "KY", medicaidEligibility: "Yes", memberName: "ABDULL GHANI", dob: "12-05-1980", eligibleCode: "W1, AA"},
+            {medicaidNo: "5289671228", state: "ME", medicaidEligibility: "Yes", memberName: "MARIA LOPEZ", dob: "03-11-1975", eligibleCode: "ZL"},
+            {medicaidNo: "5289671237", state: "SC", medicaidEligibility: "Yes", memberName: "JOHN SMITH", dob: "21-07-1990", eligibleCode: "Z"},
+            {medicaidNo: "5289671246", state: "MI", medicaidEligibility: "Yes", memberName: "LISA WONG", dob: "15-03-1985", eligibleCode: "CC, 7Q"},
+            {medicaidNo: "5289671255", state: "NY", medicaidEligibility: "Yes", memberName: "DAVID BROWN", dob: "30-09-1992", eligibleCode: "ZQ"},
+            {medicaidNo: "5289671264", state: "NC", medicaidEligibility: "Yes", memberName: "AMY JOHNSON", dob: "25-12-1988", eligibleCode: "S1"},
+            {medicaidNo: "5289671263", state: "IN", medicaidEligibility: "No", memberName: "BECKY JOHNSON", dob: "25-12-1987", eligibleCode: ""},
+            {medicaidNo: "5289671269", state: "MI", medicaidEligibility: "Yes", memberName: "RACHEL MESSMER", dob: "24-12-1989", eligibleCode: "EE"}
+        ];
+
+        const playbookData = [
+            {state: "KY", planCode: "521-014-001", dsnpCode: "FBDE", eligibleCodes: "03, 25, AA, M2, P3, P4, W1, W6", ineligibleCodes: ""},
+            {state: "ME", planCode: "521-014-002", dsnpCode: "SLMB", eligibleCodes: "", ineligibleCodes: "ZL"},
+            {state: "SC", planCode: "521-014-003", dsnpCode: "QMB", eligibleCodes: "Z", ineligibleCodes: ""},
+            {state: "MI", planCode: "521-014-004", dsnpCode: "QMB+", eligibleCodes: "BB, CC, 7Q, EE", ineligibleCodes: ""},
+            {state: "NY", planCode: "521-014-005", dsnpCode: "QI", eligibleCodes: "", ineligibleCodes: "ZQ, ZI"},
+            {state: "NC", planCode: "521-014-006", dsnpCode: "SLMB+", eligibleCodes: "L5, S1, M1, 8S", ineligibleCodes: ""},
+            {state: "IN", planCode: "521-014-007", dsnpCode: "No Medicaid", eligibleCodes: "", ineligibleCodes: ""}
+        ];
+
+        let selectedMember = null;
+        let processingLog = [];
+        let botLog = [];
+        let processingCounter = 0;
+        let awaitingConfirmation = false;
+        let pendingAction = null;
+        let foundIssues = [];
+
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        function initializeApp() {
+            // Don't load members list initially - wait for "Load from SNP" command
+            updateStats();
+            loadBotLogTable();
+            // Show empty state
+            showEmptyMembersList();
+        }
+
+        function showEmptyMembersList() {
+            const membersList = document.getElementById('membersList');
+            membersList.innerHTML = `
+                <div style="text-align: center; padding: 20px; color: var(--coforge-dark-gray); font-style: italic;">
+                    📋 No data loaded<br>
+                    <small>Click "Load from SNP" to begin</small>
+                </div>
+            `;
+        }
+
+        function loadFromSNP() {
+            if (dataLoaded) {
+                addMessage("SNP data is already loaded. Use 'Reset' to reload if needed.", false);
+                return;
+            }
+
+            // Disable the load button
+            const loadBtn = document.getElementById('loadSNPBtn');
+            loadBtn.disabled = true;
+            loadBtn.style.opacity = '0.5';
+            loadBtn.textContent = '🔄 Loading...';
+
+            addMessage("🔌 <strong>Initiating connection to SNP Database...</strong><br><br>📡 Establishing secure API connection to Centene SNP system...", false);
+
+            // Create SNP loading simulation
+            const loadingCard = createSNPLoadingCard();
+
+            // Simulate SNP API connection and data loading
+            setTimeout(() => {
+                updateSNPLoadingStep(1, 'processing');
+                setTimeout(() => {
+                    updateSNPLoadingStep(1, 'complete');
+                    updateSNPLoadingStep(2, 'processing');
+                    setTimeout(() => {
+                        updateSNPLoadingStep(2, 'complete');
+                        updateSNPLoadingStep(3, 'processing');
+                        setTimeout(() => {
+                            updateSNPLoadingStep(3, 'complete');
+                            updateSNPLoadingStep(4, 'processing');
+                            setTimeout(() => {
+                                updateSNPLoadingStep(4, 'complete');
+                                updateSNPLoadingStep(5, 'processing');
+                                setTimeout(() => {
+                                    updateSNPLoadingStep(5, 'complete');
+                                    updateSNPLoadingStep(6, 'processing');
+                                    setTimeout(() => {
+                                        updateSNPLoadingStep(6, 'complete');
+                                        
+                                        // Data loading complete
+                                        setTimeout(() => {
+                                            completeDataLoading();
+                                        }, 1000);
+                                    }, 1000);
+                                }, 800);
+                            }, 800);
+                        }, 1000);
+                    }, 800);
+                }, 1000);
+            }, 1000);
+        }
+
+        function createSNPLoadingCard() {
+            const loadingCard = document.createElement('div');
+            loadingCard.className = 'api-simulation-card';
+            loadingCard.innerHTML = `
+                <div class="api-header">
+                    <span>🔌</span>
+                    <h4>SNP Database Connection - Loading Member Data</h4>
+                </div>
+                <div id="snp-loading-steps">
+                    <div class="api-step" id="snp-step-1">
+                        <div class="api-step-icon">●</div>
+                        <span>Authenticating with SNP Database API...</span>
+                    </div>
+                    <div class="api-step" id="snp-step-2">
+                        <div class="api-step-icon">●</div>
+                        <span>Querying DSNP member records...</span>
+                    </div>
+                    <div class="api-step" id="snp-step-3">
+                        <div class="api-step-icon">●</div>
+                        <span>Retrieving member demographics...</span>
+                    </div>
+                    <div class="api-step" id="snp-step-4">
+                        <div class="api-step-icon">●</div>
+                        <span>Loading DSNP code assignments...</span>
+                    </div>
+                    <div class="api-step" id="snp-step-5">
+                        <div class="api-step-icon">●</div>
+                        <span>Fetching plan code mappings...</span>
+                    </div>
+                    <div class="api-step" id="snp-step-6">
+                        <div class="api-step-icon">●</div>
+                        <span>Validating data integrity...</span>
+                    </div>
+                </div>
+            `;
+            
+            const message = document.createElement('div');
+            message.className = 'message bot';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar bot-avatar';
+            avatar.textContent = 'AI';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.appendChild(loadingCard);
+            
+            message.appendChild(avatar);
+            message.appendChild(messageContent);
+            chatMessages.appendChild(message);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            return loadingCard;
+        }
+
+        function updateSNPLoadingStep(stepNumber, status) {
+            const step = document.getElementById(`snp-step-${stepNumber}`);
+            if (step) {
+                step.className = `api-step ${status}`;
+                if (status === 'complete') {
+                    step.querySelector('.api-step-icon').innerHTML = '✓';
+                }
+            }
+        }
+
+        function completeDataLoading() {
+            // Load the actual data
+            snpData = JSON.parse(JSON.stringify(masterSnpData));
+            dataLoaded = true;
+
+            // Update UI
+            loadMembersList();
+            updateStats();
+
+            // Enable other buttons
+            const processBtn = document.getElementById('processBtn');
+            const validateBtn = document.getElementById('validateBtn');
+            const findBtn = document.getElementById('findBtn');
+            
+            processBtn.disabled = false;
+            processBtn.style.opacity = '1';
+            validateBtn.disabled = false;
+            validateBtn.style.opacity = '1';
+            findBtn.disabled = false;
+            findBtn.style.opacity = '1';
+
+            // Update load button
+            const loadBtn = document.getElementById('loadSNPBtn');
+            loadBtn.textContent = '✅ Data Loaded';
+            loadBtn.style.background = 'var(--coforge-success)';
+
+            // Update input placeholder
+            const userInput = document.getElementById('userInput');
+            userInput.placeholder = "Select a member first, then ask me to 'process selected' to execute agentic AI processing...";
+
+            // Show success message
+            addMessage(`✅ <strong>SNP Data Loading Complete!</strong><br><br>📊 <strong>Successfully loaded ${snpData.length} member records from SNP Database:</strong><br><br>
+                <div class="results-summary">
+                    <h4>📋 Data Loading Summary</h4>
+                    <div class="results-list">
+                        ✅ ${snpData.length} DSNP member records loaded<br>
+                        ✅ Member demographics verified<br>
+                        ✅ DSNP code assignments retrieved<br>
+                        ✅ Plan code mappings validated<br>
+                        ✅ Data integrity checks passed<br>
+                        ✅ Ready for agentic AI processing
+                    </div>
+                </div>
+                <br><strong>🎯 Next Steps:</strong><br>
+                • Select a member from the sidebar to preview data<br>
+                • Use "Process Selected" for individual AI processing<br>
+                • Use "Validate All Members" for batch processing<br>
+                • Use "Find Data Issues" to analyze with AI intelligence`, false);
+        }
+
+        function loadMembersList() {
+            const membersList = document.getElementById('membersList');
+            membersList.innerHTML = '';
+
+            snpData.forEach(member => {
+                const memberCard = document.createElement('div');
+                memberCard.className = 'member-card';
+                memberCard.onclick = () => selectMember(member);
+                
+                memberCard.innerHTML = `
+                    <div class="status-indicator status-${member.status}"></div>
+                    <div class="member-info">
+                        <div class="member-details">
+                            <h4>${member.memberName}</h4>
+                            <p>${member.medicaidNo} • ${member.state}</p>
+                        </div>
+                    </div>
+                `;
+                
+                membersList.appendChild(memberCard);
+            });
+        }
+
+        function loadBotLogTable() {
+            const tbody = document.getElementById('botLogTable');
+            tbody.innerHTML = '';
+            
+            botLog.forEach(entry => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${entry.medicaidNo}</td>
+                    <td>${entry.memberName}</td>
+                    <td><span class="status-badge ${entry.basicMatch === 'Yes' ? 'status-yes' : entry.basicMatch === 'No' ? 'status-no' : 'status-na'}">${entry.basicMatch}</span></td>
+                    <td><span class="status-badge ${entry.emailSent === 'Yes' ? 'status-yes' : 'status-no'}">${entry.emailSent}</span></td>
+                    <td>${entry.medicaidEligibility}</td>
+                    <td>${entry.dsnpCode}</td>
+                    <td><span class="status-badge ${entry.screenshotSaved === 'Yes' ? 'status-yes' : 'status-no'}">${entry.screenshotSaved}</span></td>
+                    <td style="max-width: 200px; word-wrap: break-word;">${entry.comment}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function selectMember(member) {
+            selectedMember = member;
+            
+            // Update visual selection
+            document.querySelectorAll('.member-card').forEach(card => card.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            // Show simplified member info without data preview
+            showMemberInfo(member);
+        }
+
+        function showMemberInfo(member) {
+            // First, try to find passport member by Medicaid No
+            let passportMember = passportData.find(p => p.medicaidNo === member.medicaidNo);
+            
+            // If not found, try by corrected Medicaid No (for cases like Rachael)
+            if (!passportMember && member.correctedMedicaidNo && member.correctedMedicaidNo !== "NA") {
+                passportMember = passportData.find(p => p.medicaidNo === member.correctedMedicaidNo);
+            }
+            
+            if (!passportMember) {
+                addMessage(`Selected: <strong>${member.memberName}</strong> (${member.medicaidNo})<br>Status: ${member.status} | Current DSNP: ${member.dsnpCode}<br><br>⚠️ <strong>AI Analysis:</strong> This member is not found in Passport data using Medicaid No, DOB & Member Name.<br><br>📋 <strong>Expected AI Action:</strong> If processed, the agentic AI will trigger email notification per intelligent rule interpretation.<br><br>⚡ Click "Process Selected" to let the AI agent execute intelligent business rules and trigger the email notification!`, false);
+                return;
+            }
+
+            let statusNote = "";
+            if (member.correctedMedicaidNo && member.correctedMedicaidNo !== "NA") {
+                statusNote = `<br>📝 <strong>Note:</strong> Uses corrected Medicaid No (${member.correctedMedicaidNo}) for matching.`;
+            }
+
+            addMessage(`Selected: <strong>${member.memberName}</strong> (${member.medicaidNo})<br>Status: ${member.status} | Current DSNP: ${member.dsnpCode}${statusNote}<br><br>🤖 <strong>AI Agent Ready:</strong> I will intelligently analyze this member's data across SNP and Passport systems, understand the business rules, and execute appropriate actions.<br><br>⚡ <strong>Ready for Agentic Processing:</strong> Click "Process Selected" to let me autonomously execute the intelligent business rules with full API integration!`, false);
+        }
+
+        function addMessage(content, isUser = false) {
+            const message = document.createElement('div');
+            message.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = `message-avatar ${isUser ? 'user-avatar' : 'bot-avatar'}`;
+            avatar.textContent = isUser ? 'U' : 'AI';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.innerHTML = content;
+            
+            if (isUser) {
+                message.appendChild(messageContent);
+                message.appendChild(avatar);
+            } else {
+                message.appendChild(avatar);
+                message.appendChild(messageContent);
+            }
+            
+            chatMessages.appendChild(message);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function createAPISimulationCard(memberName) {
+            const apiCard = document.createElement('div');
+            apiCard.className = 'api-simulation-card';
+            apiCard.innerHTML = `
+                <div class="api-header">
+                    <span>🔌</span>
+                    <h4>API Integration - Fetching Data for ${memberName}</h4>
+                </div>
+                <div id="api-steps">
+                    <div class="api-step" id="api-step-1">
+                        <div class="api-step-icon">●</div>
+                        <span>Connecting to SNP Database API...</span>
+                    </div>
+                    <div class="api-step" id="api-step-2">
+                        <div class="api-step-icon">●</div>
+                        <span>Retrieving member record from SNP...</span>
+                    </div>
+                    <div class="api-step" id="api-step-3">
+                        <div class="api-step-icon">●</div>
+                        <span>Connecting to Passport System API...</span>
+                    </div>
+                    <div class="api-step" id="api-step-4">
+                        <div class="api-step-icon">●</div>
+                        <span>Cross-referencing eligibility data...</span>
+                    </div>
+                    <div class="api-step" id="api-step-5">
+                        <div class="api-step-icon">●</div>
+                        <span>Fetching Playbook validation rules...</span>
+                    </div>
+                </div>
+            `;
+            
+            const message = document.createElement('div');
+            message.className = 'message bot';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar bot-avatar';
+            avatar.textContent = 'AI';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.appendChild(apiCard);
+            
+            message.appendChild(avatar);
+            message.appendChild(messageContent);
+            chatMessages.appendChild(message);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            return apiCard;
+        }
+
+        function updateAPIStep(stepNumber, status) {
+            const step = document.getElementById(`api-step-${stepNumber}`);
+            if (step) {
+                step.className = `api-step ${status}`;
+                if (status === 'complete') {
+                    step.querySelector('.api-step-icon').innerHTML = '✓';
+                }
+            }
+        }
+
+        function createProcessingCard(memberName, steps) {
+            processingCounter++;
+            const uniqueId = `processing-${processingCounter}`;
+            
+            const processingCard = document.createElement('div');
+            processingCard.className = 'processing-card';
+            processingCard.id = uniqueId;
+            processingCard.innerHTML = `
+                <div class="processing-header">
+                    <div class="step-icon step-processing">⚡</div>
+                    <h4>🤖 EXECUTING Agentic AI Analysis for ${memberName}</h4>
+                </div>
+                <div id="${uniqueId}-steps">
+                    ${steps.map((step, index) => `
+                        <div class="processing-step">
+                            <div class="step-icon step-pending" id="${uniqueId}-step-${index}">●</div>
+                            <span id="${uniqueId}-text-${index}">${step}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            const message = document.createElement('div');
+            message.className = 'message bot';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar bot-avatar';
+            avatar.textContent = 'AI';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.appendChild(processingCard);
+            
+            message.appendChild(avatar);
+            message.appendChild(messageContent);
+            chatMessages.appendChild(message);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            return uniqueId;
+        }
+
+        function updateProcessingStep(cardId, stepIndex, status, newText = null) {
+            const stepIcon = document.getElementById(`${cardId}-step-${stepIndex}`);
+            const stepText = document.getElementById(`${cardId}-text-${stepIndex}`);
+            
+            if (stepIcon) {
+                stepIcon.className = `step-icon step-${status}`;
+                stepIcon.textContent = status === 'complete' ? '✓' : status === 'error' ? '✗' : status === 'email' ? '📧' : '●';
+            }
+            
+            if (newText && stepText) {
+                stepText.textContent = newText;
+            }
+        }
+
+        function showRuleExecution(ruleNumber, ruleTitle, ruleDescription, result, resultType) {
+            const ruleCard = `
+                <div class="rule-execution-card">
+                    <div class="rule-header">
+                        <span>🤖 AI Agent ${ruleNumber}: ${ruleTitle}</span>
+                    </div>
+                    <div class="rule-content">
+                        <strong>AI Understanding:</strong> ${ruleDescription}
+                        <div class="rule-result rule-${resultType}">
+                            <strong>Execution Result:</strong> ${result}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            addMessage(ruleCard, false);
+        }
+
+        function showEmailDraft(member, reason, emailType = "mismatch") {
+            const currentDate = new Date().toLocaleDateString();
+            const currentTime = new Date().toLocaleTimeString();
+            
+            let subject = "";
+            let body = "";
+            
+            if (emailType === "not_found") {
+                subject = `URGENT: Member Data Not Found in Passport - ${member.memberName} (${member.medicaidNo})`;
+                body = `Dear Data Management Team,
+
+This is an automated alert from the Coforge Agentic AI DSNP Processing System.
+
+ISSUE: Member record not found in Passport system
+ACTION REQUIRED: Manual data verification and resolution
+
+MEMBER DETAILS:
+• Name: ${member.memberName}
+• Medicaid Number: ${member.medicaidNo}
+• Date of Birth: ${member.dob}
+• State: ${member.state}
+• Plan Code: ${member.planCode}
+• Current DSNP Code: ${member.dsnpCode}
+
+SYSTEM ANALYSIS:
+The agentic AI processing system was unable to locate this member's record in the Passport database using the standard matching criteria (Medicaid No, DOB, and Member Name).
+
+REQUIRED ACTIONS:
+1. Verify member information in SNP system
+2. Cross-check Passport database manually
+3. Investigate potential data entry errors
+4. Update systems as needed
+5. Notify processing team of resolution
+
+AI AGENT TRIGGERED: Intelligent Email Trigger for Missing Data
+PROCESSING TIMESTAMP: ${currentDate} ${currentTime}
+SYSTEM: Coforge Agentic AI DSNP Assistant
+
+This case has been flagged for immediate manual review and will remain in pending status until resolved.
+
+Best regards,
+Coforge Agentic AI DSNP Processing System
+Automated Notification Service`;
+            } else {
+                subject = `DATA MISMATCH ALERT: ${member.memberName} - SNP/Passport Validation Required`;
+                body = `Dear Data Management Team,
+
+This is an automated alert from the Coforge Agentic AI DSNP Processing System.
+
+ISSUE: Data mismatch detected between SNP and Passport systems
+ACTION REQUIRED: Manual data validation and correction
+
+MEMBER DETAILS:
+• Name: ${member.memberName}
+• Medicaid Number: ${member.medicaidNo}
+• Date of Birth: ${member.dob}
+• State: ${member.state}
+• Plan Code: ${member.planCode}
+
+MISMATCH DETAILS:
+${reason}
+
+SYSTEM ANALYSIS:
+During agentic AI processing, the system detected inconsistencies between SNP and Passport data. This triggers our data integrity protocols requiring manual verification.
+
+REQUIRED ACTIONS:
+1. Review discrepancies between SNP and Passport data
+2. Verify correct member information at source
+3. Update the incorrect system with accurate data
+4. Document the correction in audit logs
+5. Reprocess this member through the system
+
+AI AGENT TRIGGERED: Intelligent Data Mismatch Protocol
+PROCESSING TIMESTAMP: ${currentDate} ${currentTime}
+SYSTEM: Coforge Agentic AI DSNP Assistant
+
+A screenshot has been automatically captured and saved for audit purposes.
+
+This case requires immediate attention to maintain data integrity standards.
+
+Best regards,
+Coforge Agentic AI DSNP Processing System
+Automated Notification Service`;
+            }
+
+            const emailDraft = `
+                <div class="email-draft-card">
+                    <div class="email-draft-header">
+                        📧 Email Draft - Ready for Automatic Dispatch
+                    </div>
+                    <div class="email-draft-content">
+                        <div class="email-field">
+                            <span class="email-label">To:</span>
+                            <span class="email-value">data-management@centene.com; processing-team@coforge.com</span>
+                        </div>
+                        <div class="email-field">
+                            <span class="email-label">CC:</span>
+                            <span class="email-value">supervisor@centene.com; audit-team@coforge.com</span>
+                        </div>
+                        <div class="email-field">
+                            <span class="email-label">Subject:</span>
+                            <span class="email-value">${subject}</span>
+                        </div>
+                        <div class="email-field">
+                            <span class="email-label">Priority:</span>
+                            <span class="email-value">High</span>
+                        </div>
+                        <div class="email-field">
+                            <span class="email-label">Auto-Send:</span>
+                            <span class="email-value">Enabled (dispatched in 30 seconds)</span>
+                        </div>
+                        
+                        <div class="email-body">
+                            <pre style="white-space: pre-wrap; font-family: 'Segoe UI', sans-serif; margin: 0;">${body}</pre>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            addMessage(emailDraft, false);
+        }
+
+        function showTyping() {
+            typingIndicator.style.display = 'flex';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function simulateTyping(callback, delay = 1500) {
+            showTyping();
+            setTimeout(() => {
+                hideTyping();
+                callback();
+            }, delay);
+        }
+
+        function processSelectedMember() {
+            if (!selectedMember) {
+                addMessage("Please select a member from the sidebar first, or mention a specific member by name or Medicaid number.", false);
+                return;
+            }
+
+            const member = selectedMember;
+            
+            member.status = 'processing';
+            updateMemberCard(member);
+            
+            simulateTyping(() => {
+                addMessage(`⚡ <strong>Starting agentic AI integration and intelligent processing for ${member.memberName}...</strong><br><br>🔌 <strong>Initializing API connections to SNP and Passport systems...</strong>`, false);
+                
+                // Create API simulation
+                const apiCard = createAPISimulationCard(member.memberName);
+                
+                // Simulate API calls
+                setTimeout(() => {
+                    updateAPIStep(1, 'processing');
+                    setTimeout(() => {
+                        updateAPIStep(1, 'complete');
+                        updateAPIStep(2, 'processing');
+                        setTimeout(() => {
+                            updateAPIStep(2, 'complete');
+                            updateAPIStep(3, 'processing');
+                            setTimeout(() => {
+                                updateAPIStep(3, 'complete');
+                                updateAPIStep(4, 'processing');
+                                setTimeout(() => {
+                                    updateAPIStep(4, 'complete');
+                                    updateAPIStep(5, 'processing');
+                                    setTimeout(() => {
+                                        updateAPIStep(5, 'complete');
+                                        
+                                        // Start agentic processing
+                                        setTimeout(() => {
+                                            addMessage(`✅ <strong>API Integration Complete!</strong><br><br>📊 All data successfully retrieved from SNP and Passport systems. Now executing agentic AI processing with intelligent rule interpretation...`, false);
+                                            
+                                            const steps = [
+                                                "🤖 AI Agent: Analyzing Basic Information Validation Requirements",
+                                                "🏥 AI Agent: Understanding Medicaid Eligibility Context", 
+                                                "📋 AI Agent: Intelligent DSNP Code Assignment Logic",
+                                                "📝 AI Agent: Processing Corrections & Audit Logging",
+                                                "📧 AI Agent: Evaluating Email Trigger Conditions"
+                                            ];
+                                            
+                                            const cardId = createProcessingCard(member.memberName, steps);
+                                            
+                                            setTimeout(() => executeBusinessRulesWithEnhancedLogging(member, steps, cardId), 1000);
+                                        }, 1000);
+                                    }, 800);
+                                }, 600);
+                            }, 600);
+                        }, 600);
+                    }, 800);
+                }, 1000);
+            });
+        }
+
+        function executeBusinessRulesWithEnhancedLogging(member, steps, cardId) {
+            // First, let's try to find the passport member by Medicaid No
+            let passportMember = passportData.find(p => p.medicaidNo === member.medicaidNo);
+            
+            // If not found by Medicaid No, try by corrected Medicaid No (for cases like Rachael)
+            if (!passportMember && member.correctedMedicaidNo && member.correctedMedicaidNo !== "NA") {
+                passportMember = passportData.find(p => p.medicaidNo === member.correctedMedicaidNo);
+            }
+            
+            let currentStep = 0;
+            let originalData = JSON.parse(JSON.stringify(member));
+            let logEntry = {
+                medicaidNo: member.medicaidNo,
+                memberName: member.memberName,
+                basicMatch: "N/A",
+                emailSent: "No",
+                medicaidEligibility: "N/A",
+                dsnpCode: member.dsnpCode,
+                screenshotSaved: "No",
+                comment: "",
+                timestamp: new Date().toLocaleString(),
+                processingDetails: []
+            };
+            
+            let shouldContinue = true; // Flag to control whether to continue processing
+            
+            function nextStep() {
+                if (currentStep >= steps.length || !shouldContinue) {
+                    // Processing complete or stopped
+                    // Add to bot log
+                    botLog.unshift(logEntry);
+                    loadBotLogTable();
+                    updateStats(); // Final update
+                    
+                    showProcessingResults(member, originalData, logEntry);
+                    return;
+                }
+                
+                updateProcessingStep(cardId, currentStep, 'processing');
+                
+                setTimeout(() => {
+                    let success = true;
+                    
+                    switch(currentStep) {
+                        case 0: // AI Agent: Basic Information Validation
+                            success = executeRule1_BasicValidationEnhanced(member, passportMember, cardId, currentStep, logEntry);
+                            if (!success) {
+                                shouldContinue = false; // Stop processing if basic validation fails
+                            }
+                            break;
+                        case 1: // AI Agent: Medicaid Eligibility
+                            success = executeRule2_MedicaidEligibilityEnhanced(member, passportMember, cardId, currentStep, logEntry);
+                            break;
+                        case 2: // AI Agent: DSNP Code Assignment
+                            success = executeRule3_DSNPAssignmentEnhanced(member, passportMember, cardId, currentStep, logEntry);
+                            break;
+                        case 3: // AI Agent: Corrections & Logging
+                            success = executeRule4_CorrectionsLoggingEnhanced(member, passportMember, cardId, currentStep, logEntry);
+                            break;
+                        case 4: // AI Agent: Email Trigger
+                            success = executeRule5_EmailTriggerEnhanced(member, passportMember, cardId, currentStep, logEntry);
+                            break;
+                    }
+                    
+                    updateProcessingStep(cardId, currentStep, success ? 'complete' : (currentStep === 0 && !success ? 'email' : 'error'));
+                    currentStep++;
+                    setTimeout(nextStep, Math.random() * 800 + 1200);
+                }, Math.random() * 1000 + 1500);
+            }
+            
+            nextStep();
+        }
+
+        function executeRule1_BasicValidationEnhanced(member, passportMember, cardId, stepIndex, logEntry) {
+            if (!passportMember) {
+                updateProcessingStep(cardId, stepIndex, 'error', "❌ AI Agent: Member not found in Passport - Email trigger required");
+                logEntry.basicMatch = "No";
+                logEntry.emailSent = "Yes";
+                logEntry.screenshotSaved = "Yes";
+                logEntry.comment = "Member not found in Passport database. Email triggered for manual review.";
+                logEntry.processingDetails.push("AI Agent triggered - Member not found in Passport");
+                member.status = 'email-sent';
+                member.comment = logEntry.comment;
+                updateMemberCard(member);
+                
+                // Update stats - increment emails sent
+                updateStats();
+                
+                showRuleExecution("1.2", "Basic Information Validation", 
+                    "AI Agent understands: If member not found in Passport by Medicaid No, DOB & Member Name, trigger email for manual review",
+                    logEntry.comment, "email");
+                
+                // Show email sent notification in chat
+                setTimeout(() => {
+                    addMessage(`📧 <strong>EMAIL SENT!</strong><br><br>An email notification has been automatically dispatched to the data management team for <strong>${member.memberName}</strong> (${member.medicaidNo}).<br><br>📬 <strong>Email Status:</strong> Successfully sent to data-management@centene.com<br>📋 <strong>Reason:</strong> Member record not found in Passport database<br>⏰ <strong>Sent at:</strong> ${new Date().toLocaleString()}`, false);
+                }, 1000);
+                
+                // Show email draft
+                showEmailDraft(member, "Member not found in Passport database", "not_found");
+                
+                return false;
+            }
+            
+            let mismatches = [];
+            let mismatchDetails = [];
+            
+            if (member.memberName !== passportMember.memberName) {
+                mismatches.push("Member Name");
+                mismatchDetails.push(`Name mismatch: SNP='${member.memberName}' vs Passport='${passportMember.memberName}'`);
+            }
+            if (member.dob !== passportMember.dob) {
+                mismatches.push("DOB");
+                mismatchDetails.push(`DOB mismatch: SNP='${member.dob}' vs Passport='${passportMember.dob}'`);
+            }
+            if (member.medicaidNo !== passportMember.medicaidNo) {
+                mismatches.push("Medicaid No");
+                mismatchDetails.push(`Medicaid No mismatch: SNP='${member.medicaidNo}' vs Passport='${passportMember.medicaidNo}'`);
+            }
+            
+            if (mismatches.length > 0) {
+                updateProcessingStep(cardId, stepIndex, 'email', `📧 AI Agent: ${mismatches.join(', ')} mismatch - Email triggered`);
+                logEntry.basicMatch = "No";
+                logEntry.emailSent = "Yes";
+                logEntry.screenshotSaved = "Yes";
+                logEntry.comment = `${mismatches.join('/')} mismatch detected. ${mismatchDetails.join('. ')}. Email triggered for manual review.`;
+                logEntry.processingDetails.push(`AI Agent triggered - ${mismatches.join(', ')} mismatch`);
+                member.status = 'email-sent';
+                member.comment = logEntry.comment;
+                updateMemberCard(member);
+                
+                // Update stats - increment emails sent
+                updateStats();
+                
+                showRuleExecution("1.2", "Basic Information Mismatch", 
+                    "AI Agent understands: If any basic information fields (Medicaid No, Member Name, DOB) do not match between SNP and Passport, mark Basic Information Matches as 'No', trigger email, save screenshot",
+                    logEntry.comment, "email");
+                
+                // Show email sent notification in chat
+                setTimeout(() => {
+                    addMessage(`📧 <strong>EMAIL SENT!</strong><br><br>An email notification has been automatically dispatched to the data management team for <strong>${member.memberName}</strong> (${member.medicaidNo}).<br><br>📬 <strong>Email Status:</strong> Successfully sent to data-management@centene.com<br>📋 <strong>Reason:</strong> ${mismatches.join('/')} mismatch between SNP and Passport<br>⏰ <strong>Sent at:</strong> ${new Date().toLocaleString()}`, false);
+                }, 1000);
+                
+                // Show email draft with specific mismatch details
+                showEmailDraft(member, mismatchDetails.join('\n'), "mismatch");
+                
+                return false;
+            }
+            
+            updateProcessingStep(cardId, stepIndex, 'complete', "✓ AI Agent: All basic information validated successfully");
+            logEntry.basicMatch = "Yes";
+            logEntry.processingDetails.push("AI Agent passed - All basic information matches");
+            
+            showRuleExecution("1.1", "Basic Information Validation", 
+                "AI Agent understands: Match Medicaid No, Member Name, and DOB between SNP and Passport",
+                "✓ All fields match successfully - proceeding to eligibility check", "success");
+            
+            return true;
+        }
+
+        function executeRule2_MedicaidEligibilityEnhanced(member, passportMember, cardId, stepIndex, logEntry) {
+            if (!passportMember.medicaidEligibility || passportMember.medicaidEligibility === "No") {
+                updateProcessingStep(cardId, stepIndex, 'complete', "✓ AI Agent: No Medicaid eligibility - Updating SNP");
+                logEntry.medicaidEligibility = "No";
+                logEntry.screenshotSaved = "Yes";
+                const oldCode = member.dsnpCode;
+                member.dsnpCode = "No Medicaid";
+                logEntry.dsnpCode = "No Medicaid";
+                logEntry.comment = `Medicaid eligibility not found in Passport. SNP updated from '${oldCode}' to 'No Medicaid'.`;
+                logEntry.processingDetails.push(`AI Agent applied - Updated DSNP code from '${oldCode}' to 'No Medicaid'`);
+                member.comment = logEntry.comment;
+                member.status = 'updated';
+                updateMemberCard(member);
+                
+                showRuleExecution("2.1", "Medicaid Eligibility Check", 
+                    "AI Agent understands: If Medicaid Eligibility in Passport is 'No' or missing, update SNP with 'No Medicaid', save screenshot",
+                    logEntry.comment, "success");
+                
+                return true;
+            }
+            
+            updateProcessingStep(cardId, stepIndex, 'complete', "✓ AI Agent: Medicaid eligibility confirmed - Proceed to DSNP validation");
+            logEntry.medicaidEligibility = "Yes";
+            logEntry.processingDetails.push("AI Agent passed - Medicaid eligibility confirmed");
+            
+            showRuleExecution("2.2", "Medicaid Eligibility Confirmed", 
+                "AI Agent understands: If Medicaid Eligibility is 'Yes', proceed to DSNP code validation",
+                "✓ Medicaid eligibility confirmed in Passport - proceeding to DSNP code assignment", "success");
+            
+            return true;
+        }
+
+        function executeRule3_DSNPAssignmentEnhanced(member, passportMember, cardId, stepIndex, logEntry) {
+            const eligibleCodes = passportMember.eligibleCode.split(', ').map(c => c.trim()).filter(c => c);
+            const playbookRule = playbookData.find(p => p.state === member.state && p.planCode === member.planCode);
+            
+            if (!playbookRule) {
+                updateProcessingStep(cardId, stepIndex, 'error', "❌ AI Agent: No matching Playbook rule found");
+                logEntry.comment = `No Playbook rule found for state ${member.state} and plan code ${member.planCode}`;
+                logEntry.processingDetails.push("AI Agent failed - No matching Playbook rule");
+                member.status = 'error';
+                member.comment = logEntry.comment;
+                updateMemberCard(member);
+                
+                showRuleExecution("3.2", "Playbook Rule Matching", 
+                    "AI Agent understands: Match State and Plan Code in SNP with Playbook",
+                    logEntry.comment, "error");
+                
+                return false;
+            }
+            
+            const playbookEligibleCodes = playbookRule.eligibleCodes.split(', ').map(c => c.trim()).filter(c => c);
+            const playbookIneligibleCodes = playbookRule.ineligibleCodes.split(', ').map(c => c.trim()).filter(c => c);
+            
+            const matchingEligibleCodes = eligibleCodes.filter(code => playbookEligibleCodes.includes(code));
+            const matchingIneligibleCodes = eligibleCodes.filter(code => playbookIneligibleCodes.includes(code));
+            
+            let recommendedDSNP = null;
+            let ruleResult = "";
+            let detailedReason = "";
+            
+            if (matchingIneligibleCodes.length > 0) {
+                recommendedDSNP = "No Medicaid";
+                ruleResult = `Ineligible code(s) found: ${matchingIneligibleCodes.join(', ')} - Setting to 'No Medicaid'`;
+                detailedReason = `Ineligible codes detected: ${matchingIneligibleCodes.join(', ')}`;
+            } else if (matchingEligibleCodes.length > 0) {
+                recommendedDSNP = playbookRule.dsnpCode;
+                ruleResult = `Eligible code(s) found: ${matchingEligibleCodes.join(', ')} - Assigning DSNP code '${recommendedDSNP}'`;
+                detailedReason = `Eligible codes matched: ${matchingEligibleCodes.join(', ')}`;
+            } else if (playbookEligibleCodes.length === 0 && playbookIneligibleCodes.length === 0) {
+                recommendedDSNP = playbookRule.dsnpCode;
+                ruleResult = `No specific code requirements - Assigning default DSNP code '${recommendedDSNP}'`;
+                detailedReason = "No specific eligibility code requirements in Playbook";
+            } else {
+                recommendedDSNP = "No Medicaid";
+                ruleResult = `No matching eligible codes found - Setting to 'No Medicaid'`;
+                detailedReason = `No eligible codes matched. Passport codes: ${eligibleCodes.join(', ')}, Required: ${playbookEligibleCodes.join(', ')}`;
+            }
+            
+            if (member.dsnpCode === recommendedDSNP) {
+                updateProcessingStep(cardId, stepIndex, 'complete', `✓ AI Agent: DSNP code '${recommendedDSNP}' already correct`);
+                logEntry.screenshotSaved = "Yes";
+                logEntry.comment = `DSNP code '${recommendedDSNP}' verified as correct. ${detailedReason}.`;
+                logEntry.processingDetails.push(`AI Agent applied - DSNP code '${recommendedDSNP}' validated`);
+                member.comment = logEntry.comment;
+                member.status = 'validated';
+                updateMemberCard(member);
+                
+                showRuleExecution("3.4", "DSNP Code Validation", 
+                    "AI Agent understands: If DSNP code in SNP already matches Playbook requirements",
+                    logEntry.comment, "success");
+            } else {
+                updateProcessingStep(cardId, stepIndex, 'complete', `✓ AI Agent: DSNP code updated to '${recommendedDSNP}'`);
+                const oldCode = member.dsnpCode;
+                member.dsnpCode = recommendedDSNP;
+                logEntry.dsnpCode = recommendedDSNP;
+                logEntry.screenshotSaved = "Yes";
+                logEntry.comment = `SNP updated: DSNP code changed from '${oldCode}' to '${recommendedDSNP}'. ${detailedReason}.`;
+                logEntry.processingDetails.push(`AI Agent applied - DSNP code updated from '${oldCode}' to '${recommendedDSNP}'`);
+                member.comment = logEntry.comment;
+                member.status = 'updated';
+                updateMemberCard(member);
+                
+                showRuleExecution("3.3", "DSNP Code Assignment", 
+                    "AI Agent understands: If any Eligible code from Passport matches Playbook's eligible codes, assign corresponding DSNP Code",
+                    `${ruleResult}. Updated from '${oldCode}' to '${recommendedDSNP}'`, "success");
+            }
+            
+            return true;
+        }
+
+        function executeRule4_CorrectionsLoggingEnhanced(member, passportMember, cardId, stepIndex, logEntry) {
+            let corrections = [];
+            
+            if (passportMember && member.medicaidNo !== passportMember.medicaidNo) {
+                const oldMedicaidNo = member.medicaidNo;
+                member.medicaidNo = passportMember.medicaidNo;
+                corrections.push(`Medicaid No corrected from ${oldMedicaidNo} to ${passportMember.medicaidNo}`);
+                logEntry.processingDetails.push(`AI Agent applied - Medicaid No corrected`);
+                
+                showRuleExecution("4.1", "Medicaid Number Correction", 
+                    "AI Agent understands: If Medicaid No in SNP does not match Passport, correct SNP Medicaid No using Passport",
+                    `Corrected Medicaid No in SNP per Passport (${oldMedicaidNo} → ${passportMember.medicaidNo})`, "success");
+            }
+            
+            const timestamp = new Date().toLocaleString();
+            processingLog.push({
+                timestamp,
+                medicaidNo: member.medicaidNo,
+                memberName: member.memberName,
+                action: 'Agentic AI Processing',
+                result: member.status,
+                comment: member.comment,
+                corrections: corrections,
+                processingDetails: logEntry.processingDetails
+            });
+            
+            if (corrections.length > 0) {
+                updateProcessingStep(cardId, stepIndex, 'complete', `✓ AI Agent: ${corrections.length} correction(s) applied and logged`);
+                logEntry.comment += ` ${corrections.join('. ')}`;
+            } else {
+                updateProcessingStep(cardId, stepIndex, 'complete', "✓ AI Agent: No corrections needed - Audit trail updated");
+            }
+            
+            logEntry.processingDetails.push("AI Agent applied - Audit trail updated");
+            
+            showRuleExecution("4.3", "Audit Trail Logging", 
+                "AI Agent understands: Log all actions in audit trail with timestamp and source",
+                "✓ All processing actions logged with timestamp for compliance audit", "success");
+            
+            return true;
+        }
+
+        function executeRule5_EmailTriggerEnhanced(member, passportMember, cardId, stepIndex, logEntry) {
+            if (logEntry.emailSent === "Yes") {
+                updateProcessingStep(cardId, stepIndex, 'email', "📧 AI Agent: Email already triggered in previous step");
+                logEntry.processingDetails.push("AI Agent - Email already dispatched");
+                
+                showRuleExecution("5.1 & 5.2", "Email Trigger Assessment", 
+                    "AI Agent understands: Email already triggered due to basic information mismatch or member not found",
+                    "Email notification sent to required participants for manual review", "email");
+            } else {
+                updateProcessingStep(cardId, stepIndex, 'complete', "✓ AI Agent: No email trigger required");
+                logEntry.processingDetails.push("AI Agent evaluated - No email trigger required");
+                
+                showRuleExecution("5.1", "Email Trigger Assessment", 
+                    "AI Agent understands: Evaluate if email trigger is required based on processing results",
+                    "✓ No email trigger required - all validations passed successfully", "success");
+            }
+            
+            return true;
+        }
+
+        function showProcessingResults(member, originalData, logEntry) {
+            setTimeout(() => {
+                if (member.status === 'updated') {
+                    const beforeAfterHTML = `
+                        <div class="before-after-container">
+                            <div class="before-after-card before">
+                                <div class="before-after-header">BEFORE</div>
+                                <div class="before-after-content">
+                                    <div class="field-change">
+                                        <span class="field-label">DSNP Code:</span>
+                                        <span class="field-value">${originalData.dsnpCode}</span>
+                                    </div>
+                                    <div class="field-change">
+                                        <span class="field-label">Status:</span>
+                                        <span class="field-value">${originalData.status}</span>
+                                    </div>
+                                    <div class="field-change">
+                                        <span class="field-label">Comment:</span>
+                                        <span class="field-value">${originalData.comment || 'None'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="before-after-card after">
+                                <div class="before-after-header">AFTER</div>
+                                <div class="before-after-content">
+                                    <div class="field-change">
+                                        <span class="field-label">DSNP Code:</span>
+                                        <span class="field-value change-highlight">${member.dsnpCode}</span>
+                                    </div>
+                                    <div class="field-change">
+                                        <span class="field-label">Status:</span>
+                                        <span class="field-value change-highlight">${member.status}</span>
+                                    </div>
+                                    <div class="field-change">
+                                        <span class="field-label">Comment:</span>
+                                        <span class="field-value change-highlight">${member.comment}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    addMessage(`✅ <strong>Agentic AI Processing Complete - SNP Updated!</strong><br><br>
+                        <strong>${member.memberName}</strong> has been successfully processed and updated in the SNP database:<br><br>
+                        ${beforeAfterHTML}
+                        <br><div class="results-summary">
+                            <h4>🎯 Processing Summary</h4>
+                            <div class="results-list">
+                                ✅ Basic Information: ${logEntry.basicMatch}<br>
+                                📧 Email Triggered: ${logEntry.emailSent}<br>
+                                🔍 Medicaid Eligibility: ${logEntry.medicaidEligibility}<br>
+                                📋 DSNP Code: ${logEntry.dsnpCode}<br>
+                                📸 Screenshot Saved: ${logEntry.screenshotSaved}<br>
+                                ✅ All agentic AI processing executed successfully<br>
+                                📊 Complete audit trail logged for compliance
+                            </div>
+                        </div>`, false);
+                        
+                } else if (member.status === 'validated') {
+                    addMessage(`✅ <strong>Agentic AI Processing Complete - Validation Successful!</strong><br><br>
+                        <strong>${member.memberName}</strong> has been validated by the AI agent:<br>
+                        📋 DSNP Code: <strong>${member.dsnpCode}</strong> ✓<br>
+                        📝 Status: Verified as correct per Passport and Playbook<br><br>
+                        <div class="results-summary">
+                            <h4>🎯 Processing Summary</h4>
+                            <div class="results-list">
+                                ✅ Basic Information: ${logEntry.basicMatch}<br>
+                                📧 Email Triggered: ${logEntry.emailSent}<br>
+                                🔍 Medicaid Eligibility: ${logEntry.medicaidEligibility}<br>
+                                📋 DSNP Code: ${logEntry.dsnpCode} (Validated)<br>
+                                📸 Screenshot Saved: ${logEntry.screenshotSaved}<br>
+                                ✅ All agentic AI processing executed successfully<br>
+                                📊 Complete audit trail logged for compliance
+                            </div>
+                        </div>`, false);
+                        
+                } else if (member.status === 'email-sent') {
+                    addMessage(`📧 <strong>Agentic AI Processing Complete - Email Triggered!</strong><br><br>
+                        <strong>${member.memberName}</strong> requires manual review:<br>
+                        📧 Issue: ${member.comment}<br><br>
+                        <div class="results-summary" style="background: linear-gradient(135deg, var(--coforge-accent) 0%, #ff8533 100%);">
+                            <h4>📧 Email Notification Sent</h4>
+                            <div class="results-list">
+                                ⚠️ Basic Information: ${logEntry.basicMatch}<br>
+                                📧 Email Triggered: ${logEntry.emailSent}<br>
+                                📸 Screenshot Saved: ${logEntry.screenshotSaved}<br>
+                                📞 Manual review required by data management team<br>
+                                📋 Case logged for follow-up action<br>
+                                📊 Complete audit trail logged for compliance
+                            </div>
+                        </div>`, false);
+                        
+                } else {
+                    addMessage(`⚠️ <strong>Agentic AI Processing Complete - Error Encountered</strong><br><br>
+                        <strong>${member.memberName}</strong> encountered processing errors:<br>
+                        📋 Issue: ${member.comment}<br><br>
+                        <div class="results-summary" style="background: linear-gradient(135deg, var(--coforge-danger) 0%, #dc3545 100%);">
+                            <h4>⚠️ Processing Error</h4>
+                            <div class="results-list">
+                                ❌ Case flagged for technical review<br>
+                                ❌ AI processing execution incomplete<br>
+                                ❌ Manual intervention required<br>
+                                📞 Contact system administrator<br>
+                                📊 Error details logged for analysis
+                            </div>
+                        </div>`, false);
+                }
+            }, 2000);
+        }
+
+        function updateMemberCard(member) {
+            const memberCards = document.querySelectorAll('.member-card');
+            const memberIndex = snpData.findIndex(m => m.medicaidNo === member.medicaidNo);
+            if (memberIndex !== -1 && memberCards[memberIndex]) {
+                const statusIndicator = memberCards[memberIndex].querySelector('.status-indicator');
+                statusIndicator.className = `status-indicator status-${member.status}`;
+            }
+        }
+
+        function validateAllCases() {
+            addMessage("🚀 Starting comprehensive agentic AI batch validation of all member cases...", false);
+            
+            // Show API batch initialization
+            addMessage("🔌 <strong>Initializing Batch API Integration...</strong><br>• Connecting to SNP Database API<br>• Establishing Passport System connection<br>• Loading Playbook validation rules<br>• Setting up agentic AI processing infrastructure", false);
+            
+            const pendingCases = snpData.filter(m => m.status === 'pending');
+            if (pendingCases.length === 0) {
+                addMessage("All cases have already been processed! Use the reset function if you'd like to start over.", false);
+                return;
+            }
+            
+            let processedCount = 0;
+            let updatedCount = 0;
+            let validatedCount = 0;
+            let emailCount = 0;
+            let errorCount = 0;
+            
+            function processNextCase() {
+                if (processedCount >= pendingCases.length) {
+                    const summaryHTML = `
+                        <div class="results-summary">
+                            <h4>🎉 Batch Agentic AI Processing Complete!</h4>
+                            <div class="results-list">
+                                📊 Total Processed: ${processedCount} cases<br>
+                                ✅ SNP Updated: ${updatedCount} cases<br>
+                                ✓ Validated (no changes): ${validatedCount} cases<br>
+                                📧 Email Triggers: ${emailCount} cases<br>
+                                ⚠️ Errors: ${errorCount} cases<br><br>
+                                🔍 All executions logged in Bot Processing Log<br>
+                                📊 Excel export available for audit trail<br>
+                                🔌 All API calls completed successfully<br>
+                                🤖 Agentic AI processing completed with intelligence
+                            </div>
+                        </div>
+                    `;
+                    
+                    addMessage(`${summaryHTML}`, false);
+                    updateStats();
+                    return;
+                }
+                
+                const currentCase = pendingCases[processedCount];
+                addMessage(`🔄 Processing ${processedCount + 1}/${pendingCases.length}: <strong>${currentCase.memberName}</strong> - Agentic AI analysis and rule execution in progress...`, false);
+                
+                const result = processQuietlyWithEnhancedRules(currentCase);
+                
+                if (result === 'updated') updatedCount++;
+                else if (result === 'validated') validatedCount++;
+                else if (result === 'email-sent') emailCount++;
+                else if (result === 'error') errorCount++;
+                
+                processedCount++;
+                setTimeout(processNextCase, 2000); // Longer delay to simulate API calls
+            }
+            
+            setTimeout(processNextCase, 2000);
+        }
+
+        function processQuietlyWithEnhancedRules(member) {
+            // First, let's try to find the passport member by Medicaid No
+            let passportMember = passportData.find(p => p.medicaidNo === member.medicaidNo);
+            
+            // If not found by Medicaid No, try by name and DOB (for cases like Rachael with corrected Medicaid No)
+            if (!passportMember && member.correctedMedicaidNo && member.correctedMedicaidNo !== "NA") {
+                passportMember = passportData.find(p => p.medicaidNo === member.correctedMedicaidNo);
+            }
+            
+            let logEntry = {
+                medicaidNo: member.medicaidNo,
+                memberName: member.memberName,
+                basicMatch: "N/A",
+                emailSent: "No",
+                medicaidEligibility: "N/A",
+                dsnpCode: member.dsnpCode,
+                screenshotSaved: "No",
+                comment: "",
+                timestamp: new Date().toLocaleString(),
+                processingDetails: []
+            };
+            
+            // AI Agent: Basic Information Validation
+            if (!passportMember) {
+                logEntry.basicMatch = "No";
+                logEntry.emailSent = "Yes";
+                logEntry.screenshotSaved = "Yes";
+                logEntry.comment = "Member not found in Passport database via API. Email triggered for manual review.";
+                logEntry.processingDetails.push("AI Agent triggered - Member not found in Passport API");
+                member.status = 'email-sent';
+                member.comment = logEntry.comment;
+                updateMemberCard(member);
+                updateStats(); // Update dashboard immediately
+                botLog.unshift(logEntry);
+                loadBotLogTable(); // Refresh log table
+                
+                // Show email sent notification for batch processing
+                addMessage(`📧 <strong>EMAIL SENT for ${member.memberName}</strong> - Member not found in Passport database`, false);
+                
+                return 'email-sent';
+            }
+            
+            let mismatches = [];
+            let mismatchDetails = [];
+            
+            if (member.memberName !== passportMember.memberName) {
+                mismatches.push("Name");
+                mismatchDetails.push(`Name mismatch detected`);
+            }
+            if (member.dob !== passportMember.dob) {
+                mismatches.push("DOB");
+                mismatchDetails.push(`DOB mismatch detected`);
+            }
+            if (member.medicaidNo !== passportMember.medicaidNo) {
+                mismatches.push("Medicaid No");
+                mismatchDetails.push(`Medicaid No mismatch detected`);
+            }
+            
+            if (mismatches.length > 0) {
+                logEntry.basicMatch = "No";
+                logEntry.emailSent = "Yes";
+                logEntry.screenshotSaved = "Yes";
+                logEntry.comment = `${mismatches.join('/')} mismatch between SNP and Passport APIs. ${mismatchDetails.join('. ')}. Email triggered for manual review.`;
+                logEntry.processingDetails.push(`AI Agent triggered - ${mismatches.join(', ')} mismatch`);
+                member.status = 'email-sent';
+                member.comment = logEntry.comment;
+                updateMemberCard(member);
+                updateStats(); // Update dashboard immediately
+                botLog.unshift(logEntry);
+                loadBotLogTable(); // Refresh log table
+                
+                // Show email sent notification for batch processing
+                addMessage(`📧 <strong>EMAIL SENT for ${member.memberName}</strong> - ${mismatches.join('/')} mismatch detected`, false);
+                
+                return 'email-sent';
+            }
+            
+            logEntry.basicMatch = "Yes";
+            logEntry.processingDetails.push("AI Agent passed - All basic information matches via API");
+            
+            // AI Agent: Medicaid Eligibility
+            if (!passportMember.medicaidEligibility || passportMember.medicaidEligibility === "No") {
+                logEntry.medicaidEligibility = "No";
+                logEntry.screenshotSaved = "Yes";
+                const oldCode = member.dsnpCode;
+                member.dsnpCode = "No Medicaid";
+                logEntry.dsnpCode = "No Medicaid";
+                logEntry.comment = `No Medicaid eligibility in Passport API. SNP updated from '${oldCode}' to 'No Medicaid'.`;
+                logEntry.processingDetails.push(`AI Agent applied - Updated DSNP code from '${oldCode}' to 'No Medicaid'`);
+                member.comment = logEntry.comment;
+                member.status = 'updated';
+                updateMemberCard(member);
+                updateStats(); // Update dashboard immediately
+                botLog.unshift(logEntry);
+                loadBotLogTable(); // Refresh log table
+                return 'updated';
+            }
+            
+            logEntry.medicaidEligibility = "Yes";
+            logEntry.processingDetails.push("AI Agent passed - Medicaid eligibility confirmed via API");
+            
+            // AI Agent: DSNP Code Assignment
+            const playbookRule = playbookData.find(p => p.state === member.state && p.planCode === member.planCode);
+            if (!playbookRule) {
+                logEntry.comment = `No Playbook rule found for state ${member.state} and plan code ${member.planCode}`;
+                logEntry.processingDetails.push("AI Agent failed - No matching Playbook rule");
+                member.status = 'error';
+                member.comment = logEntry.comment;
+                updateMemberCard(member);
+                updateStats(); // Update dashboard immediately
+                botLog.unshift(logEntry);
+                loadBotLogTable(); // Refresh log table
+                return 'error';
+            }
+            
+            const eligibleCodes = passportMember.eligibleCode.split(', ').map(c => c.trim()).filter(c => c);
+            const playbookEligibleCodes = playbookRule.eligibleCodes.split(', ').map(c => c.trim()).filter(c => c);
+            const playbookIneligibleCodes = playbookRule.ineligibleCodes.split(', ').map(c => c.trim()).filter(c => c);
+            
+            const matchingEligibleCodes = eligibleCodes.filter(code => playbookEligibleCodes.includes(code));
+            const matchingIneligibleCodes = eligibleCodes.filter(code => playbookIneligibleCodes.includes(code));
+            
+            let recommendedDSNP = null;
+            let detailedReason = "";
+            
+            if (matchingIneligibleCodes.length > 0) {
+                recommendedDSNP = "No Medicaid";
+                detailedReason = `Ineligible codes detected: ${matchingIneligibleCodes.join(', ')}`;
+            } else if (matchingEligibleCodes.length > 0) {
+                recommendedDSNP = playbookRule.dsnpCode;
+                detailedReason = `Eligible codes matched: ${matchingEligibleCodes.join(', ')}`;
+            } else if (playbookEligibleCodes.length === 0 && playbookIneligibleCodes.length === 0) {
+                recommendedDSNP = playbookRule.dsnpCode;
+                detailedReason = "No specific eligibility code requirements in Playbook";
+            } else {
+                recommendedDSNP = "No Medicaid";
+                detailedReason = `No eligible codes matched. Available: ${eligibleCodes.join(', ')}, Required: ${playbookEligibleCodes.join(', ')}`;
+            }
+            
+            logEntry.screenshotSaved = "Yes";
+            
+            if (member.dsnpCode === recommendedDSNP) {
+                logEntry.comment = `DSNP code '${recommendedDSNP}' verified as correct via AI analysis. ${detailedReason}.`;
+                logEntry.processingDetails.push(`AI Agent applied - DSNP code '${recommendedDSNP}' validated`);
+                member.comment = logEntry.comment;
+                member.status = 'validated';
+                updateMemberCard(member);
+                updateStats(); // Update dashboard immediately
+                botLog.unshift(logEntry);
+                loadBotLogTable(); // Refresh log table
+                return 'validated';
+            } else {
+                const oldCode = member.dsnpCode;
+                member.dsnpCode = recommendedDSNP;
+                logEntry.dsnpCode = recommendedDSNP;
+                logEntry.comment = `SNP updated via AI Agent: DSNP code changed from '${oldCode}' to '${recommendedDSNP}'. ${detailedReason}.`;
+                logEntry.processingDetails.push(`AI Agent applied - DSNP code updated from '${oldCode}' to '${recommendedDSNP}'`);
+                member.comment = logEntry.comment;
+                member.status = 'updated';
+                updateMemberCard(member);
+                updateStats(); // Update dashboard immediately
+                botLog.unshift(logEntry);
+                loadBotLogTable(); // Refresh log table
+                return 'updated';
+            }
+        }
+
+        function findMismatches() {
+            simulateTyping(() => {
+                let rule1Issues = [];
+                let rule2Issues = [];
+                let rule3Issues = [];
+                
+                snpData.forEach(member => {
+                    const passportMember = passportData.find(p => p.medicaidNo === member.medicaidNo);
+                    
+                    if (!passportMember) {
+                        rule1Issues.push({
+                            member: member,
+                            issue: 'AI Agent Trigger: Member not found in Passport data',
+                            severity: 'critical'
+                        });
+                        return;
+                    }
+                    
+                    // AI Agent checks
+                    let mismatches = [];
+                    if (member.memberName !== passportMember.memberName) mismatches.push("Member Name");
+                    if (member.dob !== passportMember.dob) mismatches.push("DOB");
+                    if (member.medicaidNo !== passportMember.medicaidNo) mismatches.push("Medicaid No");
+                    
+                    if (mismatches.length > 0) {
+                        rule1Issues.push({
+                            member: member,
+                            issue: `AI Agent Trigger: ${mismatches.join(', ')} mismatch`,
+                            severity: 'high'
+                        });
+                    }
+                    
+                    // AI Agent: Medicaid Eligibility checks
+                    if (!passportMember.medicaidEligibility || passportMember.medicaidEligibility === "No") {
+                        rule2Issues.push({
+                            member: member,
+                            issue: 'AI Agent: No Medicaid eligibility in Passport',
+                            severity: 'medium'
+                        });
+                    }
+                    
+                    // AI Agent: DSNP checks
+                    const playbookRule = playbookData.find(p => p.state === member.state);
+                    if (playbookRule && passportMember.medicaidEligibility === "Yes") {
+                        const eligibleCodes = passportMember.eligibleCode.split(', ').map(c => c.trim()).filter(c => c);
+                        const playbookEligibleCodes = playbookRule.eligibleCodes.split(', ').map(c => c.trim()).filter(c => c);
+                        const playbookIneligibleCodes = playbookRule.ineligibleCodes.split(', ').map(c => c.trim()).filter(c => c);
+                        
+                        const matchingEligibleCodes = eligibleCodes.filter(code => playbookEligibleCodes.includes(code));
+                        const matchingIneligibleCodes = eligibleCodes.filter(code => playbookIneligibleCodes.includes(code));
+                        
+                        let shouldBeCode = null;
+                        if (matchingIneligibleCodes.length > 0) {
+                            shouldBeCode = "No Medicaid";
+                        } else if (matchingEligibleCodes.length > 0) {
+                            shouldBeCode = playbookRule.dsnpCode;
+                        } else if (playbookEligibleCodes.length === 0 && playbookIneligibleCodes.length === 0) {
+                            shouldBeCode = playbookRule.dsnpCode;
+                        } else {
+                            shouldBeCode = "No Medicaid";
+                        }
+                        
+                        if (member.dsnpCode !== shouldBeCode) {
+                            rule3Issues.push({
+                                member: member,
+                                issue: `AI Agent: DSNP code should be '${shouldBeCode}' (currently '${member.dsnpCode}')`,
+                                severity: 'medium'
+                            });
+                        }
+                    }
+                });
+                
+                foundIssues = [...rule1Issues, ...rule2Issues, ...rule3Issues];
+                
+                if (foundIssues.length === 0) {
+                    addMessage("🎉 <strong>Excellent!</strong> All agentic AI processing rules are satisfied. No issues found that would trigger email notifications or require DSNP code updates.", false);
+                } else {
+                    let message = "🔍 <strong>Agentic AI Analysis Results:</strong><br><br>";
+                    
+                    if (rule1Issues.length > 0) {
+                        message += `<strong>🚨 AI Agent Issues (${rule1Issues.length}) - Email Triggers:</strong><br>`;
+                        rule1Issues.forEach(issue => {
+                            message += `📧 <strong>${issue.member.memberName}</strong>: ${issue.issue}<br>`;
+                        });
+                        message += "<br>";
+                    }
+                    
+                    if (rule2Issues.length > 0) {
+                        message += `<strong>⚠️ AI Agent Issues (${rule2Issues.length}) - Eligibility Updates:</strong><br>`;
+                        rule2Issues.forEach(issue => {
+                            message += `📋 <strong>${issue.member.memberName}</strong>: ${issue.issue}<br>`;
+                        });
+                        message += "<br>";
+                    }
+                    
+                    if (rule3Issues.length > 0) {
+                        message += `<strong>🎯 AI Agent Issues (${rule3Issues.length}) - DSNP Code Updates:</strong><br>`;
+                        rule3Issues.forEach(issue => {
+                            message += `🔄 <strong>${issue.member.memberName}</strong>: ${issue.issue}<br>`;
+                        });
+                        message += "<br>";
+                    }
+                    
+                    message += `<div class="awaiting-response">I found ${foundIssues.length} issues that the agentic AI can resolve. Would you like me to execute the intelligent processing automatically to fix these issues?</div>`;
+                    awaitingConfirmation = true;
+                    pendingAction = 'fix-rules';
+                    
+                    addMessage(message, false);
+                }
+            });
+        }
+
+        function autoFixIssues() {
+            awaitingConfirmation = false;
+            pendingAction = null;
+            
+            addMessage(`🔧 <strong>Executing agentic AI processing to fix ${foundIssues.length} issues...</strong>`, false);
+            
+            let emailTriggered = 0;
+            let codeUpdated = 0;
+            let eligibilityUpdated = 0;
+            
+            foundIssues.forEach(issue => {
+                const member = issue.member;
+                let passportMember = passportData.find(p => p.medicaidNo === member.medicaidNo);
+                
+                // Try corrected Medicaid No if not found
+                if (!passportMember && member.correctedMedicaidNo && member.correctedMedicaidNo !== "NA") {
+                    passportMember = passportData.find(p => p.medicaidNo === member.correctedMedicaidNo);
+                }
+                
+                let logEntry = {
+                    medicaidNo: member.medicaidNo,
+                    memberName: member.memberName,
+                    basicMatch: "N/A",
+                    emailSent: "No",
+                    medicaidEligibility: "N/A",
+                    dsnpCode: member.dsnpCode,
+                    screenshotSaved: "Yes",
+                    comment: "",
+                    timestamp: new Date().toLocaleString(),
+                    processingDetails: []
+                };
+                
+                if (issue.severity === 'critical' || issue.issue.includes('not found') || issue.issue.includes('mismatch')) {
+                    // Email trigger cases
+                    logEntry.basicMatch = issue.issue.includes('not found') ? "No" : "No";
+                    logEntry.emailSent = "Yes";
+                    member.status = 'email-sent';
+                    
+                    if (issue.issue.includes('not found')) {
+                        logEntry.comment = "Member not found in Passport database via API. Email triggered for manual review.";
+                        member.comment = logEntry.comment;
+                        
+                        // Show email sent notification
+                        addMessage(`📧 <strong>EMAIL SENT for ${member.memberName}</strong> - Member not found in Passport database`, false);
+                    } else {
+                        const mismatchType = issue.issue.includes('Member Name') ? 'Name' : 
+                                           issue.issue.includes('DOB') ? 'DOB' : 'Medicaid No';
+                        logEntry.comment = `${mismatchType} mismatch between SNP and Passport APIs. Email triggered for manual review.`;
+                        member.comment = logEntry.comment;
+                        
+                        // Show email sent notification
+                        addMessage(`📧 <strong>EMAIL SENT for ${member.memberName}</strong> - ${mismatchType} mismatch detected`, false);
+                    }
+                    emailTriggered++;
+                } else if (issue.issue.includes('No Medicaid eligibility')) {
+                    // Medicaid eligibility updates
+                    const oldCode = member.dsnpCode;
+                    member.dsnpCode = "No Medicaid";
+                    logEntry.dsnpCode = "No Medicaid";
+                    logEntry.medicaidEligibility = "No";
+                    logEntry.basicMatch = "Yes";
+                    member.status = 'updated';
+                    logEntry.comment = `No Medicaid eligibility in Passport API. SNP updated from '${oldCode}' to 'No Medicaid'.`;
+                    member.comment = logEntry.comment;
+                    eligibilityUpdated++;
+                } else if (issue.issue.includes('DSNP code should be')) {
+                    // DSNP code updates
+                    const shouldBeMatch = issue.issue.match(/should be '([^']+)'/);
+                    if (shouldBeMatch) {
+                        const oldCode = member.dsnpCode;
+                        member.dsnpCode = shouldBeMatch[1];
+                        logEntry.dsnpCode = shouldBeMatch[1];
+                        logEntry.basicMatch = "Yes";
+                        logEntry.medicaidEligibility = "Yes";
+                        member.status = 'updated';
+                        logEntry.comment = `SNP updated via AI Agent: DSNP code changed from '${oldCode}' to '${member.dsnpCode}' per Playbook validation.`;
+                        member.comment = logEntry.comment;
+                        codeUpdated++;
+                    }
+                }
+                
+                updateMemberCard(member);
+                botLog.unshift(logEntry);
+            });
+            
+            // Update stats after all members are processed
+            updateStats();
+            loadBotLogTable();
+            
+            // Show detailed results
+            const resultsHTML = `
+                <div class="results-summary">
+                    <h4>🎯 Agentic AI Processing Results</h4>
+                    <div class="results-list">
+                        📧 Email triggers activated: ${emailTriggered} cases<br>
+                        📋 Medicaid eligibility updates: ${eligibilityUpdated} cases<br>
+                        🔄 DSNP code updates: ${codeUpdated} cases<br>
+                        📸 Screenshots saved for all processed cases<br>
+                        📝 All changes logged in Bot Processing Log<br>
+                        🔍 Complete audit trail maintained for compliance<br>
+                        🔌 All API integrations completed successfully<br>
+                        🤖 Agentic AI processing executed with intelligence
+                    </div>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                addMessage(`✅ <strong>Agentic AI Processing Complete!</strong><br><br>${resultsHTML}<br>All issues have been processed according to the intelligent agentic AI understanding. Check the Bot Processing Log in the sidebar for detailed tracking information.`, false);
+            }, 2000);
+        }
+
+        function showBusinessRules() {
+            const rulesHTML = `
+                <div class="rule-execution-card">
+                    <div class="rule-header">🤖 Enhanced Agentic AI Processing Overview</div>
+                    <div class="rule-content">
+                        <strong>AI Agent Understanding 1: Basic Information Validation</strong><br>
+                        • AI Agent 1.1: Intelligently match Medicaid No, Member Name, and DOB between SNP and Passport APIs<br>
+                        • AI Agent 1.2: If mismatch detected → Mark Basic Info as "No", trigger intelligent email with specific details, save screenshot<br><br>
+                        
+                        <strong>AI Agent Understanding 2: Medicaid Eligibility</strong><br>
+                        • AI Agent 2.1: If eligibility "No" or missing → Update SNP "No Medicaid", save screenshot<br>
+                        • AI Agent 2.2: If eligibility "Yes" → Proceed to intelligent DSNP validation<br><br>
+                        
+                        <strong>AI Agent Understanding 3: DSNP Code Assignment</strong><br>
+                        • AI Agent 3.1: Extract eligible codes from Passport API<br>
+                        • AI Agent 3.2: Intelligently match State and Plan Code with Playbook via API<br>
+                        • AI Agent 3.3: If eligible codes match → Assign DSNP code, save screenshot<br>
+                        • AI Agent 3.4: If DSNP already matches → Log verification<br><br>
+                        
+                        <strong>AI Agent Understanding 4: Corrections & Logging</strong><br>
+                        • AI Agent 4.1: Correct SNP Medicaid No if mismatch with Passport<br>
+                        • AI Agent 4.2: Save screenshots at every decision point<br>
+                        • AI Agent 4.3: Log all actions with timestamp and source<br><br>
+                        
+                        <strong>AI Agent Understanding 5: Email Triggers</strong><br>
+                        • AI Agent 5.1: Trigger if basic info mismatch or member not found<br>
+                        • AI Agent 5.2: Generate detailed email drafts with specific issue information<br><br>
+                        
+                        <strong>Enhanced Agentic AI Features:</strong><br>
+                        • 🔌 Full API simulation for SNP and Passport systems<br>
+                        • 📧 Complete email draft generation with recipient details<br>
+                        • 📊 Excel export functionality for audit compliance<br>
+                        • 🔍 Detailed comments showing specific mismatch types<br>
+                        • ⚡ Batch processing with individual AI agent execution logging<br>
+                        • 🤖 Intelligent understanding and autonomous execution of business rules
+                    </div>
+                </div>
+            `;
+            
+            addMessage(`🤖 <strong>Complete Enhanced Agentic AI Processing Documentation</strong><br><br>This is an intelligent AI agent that understands and executes complex business rules autonomously:<br><br>${rulesHTML}<br>All processing is executed with full agentic AI intelligence, detailed audit logging, screenshot capture, and email draft generation for complete compliance.`, false);
+        }
+
+        function exportToExcel() {
+            if (botLog.length === 0) {
+                addMessage("No processing data available to export. Please process some members first.", false);
+                return;
+            }
+
+            // Prepare data for Excel export
+            const exportData = botLog.map(entry => ({
+                'Timestamp': entry.timestamp || new Date().toLocaleString(),
+                'Medicaid No': entry.medicaidNo,
+                'Member Name': entry.memberName,
+                'Basic Information Match': entry.basicMatch,
+                'Email Triggered': entry.emailSent,
+                'Medicaid Eligibility': entry.medicaidEligibility,
+                'DSNP Code': entry.dsnpCode,
+                'Screenshot Saved': entry.screenshotSaved,
+                'Processing Comment': entry.comment,
+                'Processing Details': entry.processingDetails ? entry.processingDetails.join('; ') : 'N/A'
+            }));
+
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Main processing log worksheet
+            const ws1 = XLSX.utils.json_to_sheet(exportData);
+            
+            // Auto-size columns
+            const colWidths = [
+                { wch: 20 }, // Timestamp
+                { wch: 15 }, // Medicaid No
+                { wch: 20 }, // Member Name
+                { wch: 15 }, // Basic Match
+                { wch: 12 }, // Email
+                { wch: 15 }, // Eligibility
+                { wch: 12 }, // DSNP Code
+                { wch: 12 }, // Screenshot
+                { wch: 40 }, // Comment
+                { wch: 50 }  // Processing Details
+            ];
+            ws1['!cols'] = colWidths;
+            
+            XLSX.utils.book_append_sheet(wb, ws1, "Processing Log");
+
+            // Summary statistics worksheet
+            const stats = {
+                'Total Cases': snpData.length,
+                'Processed Cases': snpData.filter(m => m.status !== 'pending').length,
+                'Updated Cases': snpData.filter(m => m.status === 'updated').length,
+                'Validated Cases': snpData.filter(m => m.status === 'validated').length,
+                'Email Triggered': snpData.filter(m => m.status === 'email-sent').length,
+                'Error Cases': snpData.filter(m => m.status === 'error').length
+            };
+            
+            const statsData = Object.entries(stats).map(([key, value]) => ({
+                'Metric': key,
+                'Count': value,
+                'Percentage': `${((value / snpData.length) * 100).toFixed(1)}%`
+            }));
+            
+            const ws2 = XLSX.utils.json_to_sheet(statsData);
+            ws2['!cols'] = [{ wch: 20 }, { wch: 10 }, { wch: 15 }];
+            XLSX.utils.book_append_sheet(wb, ws2, "Summary Statistics");
+
+            // Member details worksheet
+            const memberDetails = snpData.map(member => ({
+                'Medicaid No': member.medicaidNo,
+                'Member Name': member.memberName,
+                'Date of Birth': member.dob,
+                'State': member.state,
+                'Plan Code': member.planCode,
+                'Current DSNP Code': member.dsnpCode,
+                'Status': member.status,
+                'Comment': member.comment || 'None'
+            }));
+            
+            const ws3 = XLSX.utils.json_to_sheet(memberDetails);
+            ws3['!cols'] = [
+                { wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 8 }, 
+                { wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 30 }
+            ];
+            XLSX.utils.book_append_sheet(wb, ws3, "Member Details");
+
+            // Generate filename with timestamp
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            const filename = `DSNP_AI_Processing_Log_${timestamp}.xlsx`;
+            
+            // Download the file
+            XLSX.writeFile(wb, filename);
+            
+            addMessage(`📊 <strong>Excel Export Complete!</strong><br><br>Downloaded: <strong>${filename}</strong><br><br>📋 <strong>Export Contents:</strong><br>• Processing Log: Complete audit trail with timestamps<br>• Summary Statistics: Processing metrics and percentages<br>• Member Details: Current status of all member cases<br><br>🔍 The exported file contains ${botLog.length} processing records with full compliance documentation and agentic AI processing details.`, false);
+        }
+
+        function updateStats() {
+            const total = snpData.length;
+            const processed = snpData.filter(m => m.status !== 'pending').length;
+            const emails = snpData.filter(m => m.status === 'email-sent').length;
+            const updated = snpData.filter(m => m.status === 'updated').length;
+            
+            document.getElementById('totalMembers').textContent = total;
+            document.getElementById('processedMembers').textContent = processed;
+            document.getElementById('emailsSent').textContent = emails;
+            document.getElementById('updatedMembers').textContent = updated;
+        }
+
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, true);
+            userInput.value = '';
+
+            processUserInput(message);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function processUserInput(input) {
+            const lowerInput = input.toLowerCase();
+            
+            // Handle pending confirmation responses
+            if (awaitingConfirmation) {
+                if (lowerInput.includes('yes') || lowerInput.includes('fix') || lowerInput.includes('process') || lowerInput.includes('execute') || lowerInput.includes('automatically')) {
+                    autoFixIssues();
+                    return;
+                } else if (lowerInput.includes('no') || lowerInput.includes('cancel') || lowerInput.includes('skip')) {
+                    awaitingConfirmation = false;
+                    pendingAction = null;
+                    addMessage("Understood. I won't automatically execute the agentic AI processing. You can manually process individual cases as needed.", false);
+                    return;
+                }
+            }
+            
+            // Check for specific member mentions
+            const medicaidMatch = input.match(/\b5289671\d{3}\b/);
+            if (medicaidMatch) {
+                const medicaidNo = medicaidMatch[0];
+                const member = snpData.find(m => m.medicaidNo === medicaidNo);
+                if (member) {
+                    selectedMember = member;
+                    selectMemberVisually(member);
+                    showMemberInfo(member);
+                    return;
+                }
+            }
+            
+            // Check for member names
+            const memberByName = snpData.find(m => 
+                lowerInput.includes(m.memberName.toLowerCase()) || 
+                m.memberName.toLowerCase().includes(lowerInput.replace(/[^a-z\s]/g, ''))
+            );
+            
+            if (memberByName) {
+                selectedMember = memberByName;
+                selectMemberVisually(memberByName);
+                showMemberInfo(memberByName);
+                return;
+            }
+            
+            // Process commands
+            if (lowerInput.includes('load') && lowerInput.includes('snp')) {
+                loadFromSNP();
+            } else if ((lowerInput.includes('process') || lowerInput.includes('run') || lowerInput.includes('start')) && !lowerInput.includes('all')) {
+                processSelectedMember();
+            } else if ((lowerInput.includes('process') || lowerInput.includes('validate')) && lowerInput.includes('all')) {
+                validateAllCases();
+            } else if (lowerInput.includes('mismatch') || lowerInput.includes('issue') || lowerInput.includes('problem') || lowerInput.includes('find')) {
+                findMismatches();
+            } else if (lowerInput.includes('rule') || lowerInput.includes('business') || lowerInput.includes('agent')) {
+                showBusinessRules();
+            } else if (lowerInput.includes('export') || lowerInput.includes('excel') || lowerInput.includes('download')) {
+                exportToExcel();
+            } else if (lowerInput.includes('reset') || lowerInput.includes('clear')) {
+                resetAllData();
+            } else if (lowerInput.includes('help') || lowerInput.includes('what can you do')) {
+                showHelp();
+            } else {
+                simulateTyping(() => {
+                    addMessage(`I understand you're asking about: "${input}". Here's what I can help you with:<br><br>• <strong>Process members</strong> - mention their name/ID or say "process selected"<br>• <strong>"Validate all cases"</strong> - batch agentic AI execution with API simulation<br>• <strong>"Find mismatches"</strong> - intelligent AI analysis<br>• <strong>"Show business rules"</strong> - view enhanced agentic AI documentation<br>• <strong>"Export excel"</strong> - download complete audit logs<br>• <strong>"Reset all"</strong> - start fresh<br><br>💡 Try selecting a member from the sidebar first, then ask me to process them to see the full agentic AI integration and email drafts!`, false);
+                });
+            }
+        }
+
+        function selectMemberVisually(member) {
+            const memberCards = document.querySelectorAll('.member-card');
+            memberCards.forEach((card, index) => {
+                card.classList.remove('active');
+                if (snpData[index].medicaidNo === member.medicaidNo) {
+                    card.classList.add('active');
+                }
+            });
+        }
+
+        function showHelp() {
+            const helpHTML = `
+                <div class="comparison-table">
+                    <div class="comparison-header">Enhanced Agentic AI Processing Engine Capabilities</div>
+                    <div class="comparison-content">
+                        <table>
+                            <tr>
+                                <td style="font-weight: 600;">🤖 Agentic AI Processing</td>
+                                <td>Intelligent understanding and autonomous execution of business rules</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">🔌 API Integration</td>
+                                <td>Simulated SNP and Passport API calls with realistic timing</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">📧 Email Drafts</td>
+                                <td>Complete email generation with recipients and detailed content</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">📊 Excel Export</td>
+                                <td>Download complete audit logs with multiple worksheets</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">🔍 Enhanced Logging</td>
+                                <td>Detailed comments showing specific mismatch types and reasons</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">⚡ Batch Processing</td>
+                                <td>Process all members with individual AI agent execution logging</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">🎯 Auto-Fix Issues</td>
+                                <td>Automatically resolve issues with intelligent AI processing</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">📸 Screenshot Simulation</td>
+                                <td>Automated screenshot capture at every decision point</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            addMessage(`🤖 <strong>Enhanced Coforge Agentic AI Processing Engine Help</strong><br><br>I am an intelligent agent that understands and executes business rules autonomously with full API integration, detailed logging, and compliance features.<br><br>${helpHTML}<br><strong>💡 Agentic AI Features:</strong><br>• Intelligent understanding of complex business rules<br>• Autonomous execution with minimal human intervention<br>• API simulation shows realistic system integration<br>• Email drafts show exact content that would be sent<br>• Excel export provides complete audit documentation<br>• Enhanced comments show specific mismatch details<br>• Complete processing timeline with timestamps<br>• AI agent processes rules with intelligence and context`, false);
+        }
+
+        function resetAllData() {
+            // Reset data loading state
+            dataLoaded = false;
+            snpData = [];
+            
+            // Reset load button
+            const loadBtn = document.getElementById('loadSNPBtn');
+            loadBtn.disabled = false;
+            loadBtn.style.opacity = '1';
+            loadBtn.textContent = '🔌 Load from SNP';
+            loadBtn.style.background = '';
+
+            // Disable other buttons
+            const processBtn = document.getElementById('processBtn');
+            const validateBtn = document.getElementById('validateBtn');
+            const findBtn = document.getElementById('findBtn');
+            
+            processBtn.disabled = true;
+            processBtn.style.opacity = '0.5';
+            validateBtn.disabled = true;
+            validateBtn.style.opacity = '0.5';
+            findBtn.disabled = true;
+            findBtn.style.opacity = '0.5';
+
+            // Clear all logs and state
+            processingLog = [];
+            botLog = [];
+            selectedMember = null;
+            awaitingConfirmation = false;
+            pendingAction = null;
+            foundIssues = [];
+            processingCounter = 0;
+            
+            // Refresh UI
+            showEmptyMembersList();
+            loadBotLogTable();
+            updateStats();
+
+            // Reset input placeholder
+            const userInput = document.getElementById('userInput');
+            userInput.placeholder = "Type 'Load from SNP' to connect to the database and begin processing...";
+            
+            addMessage("🔄 <strong>System Reset Complete</strong><br><br>✅ All data cleared and system reset<br>✅ SNP connection terminated<br>✅ Bot Processing Log cleared<br>✅ Processing counters reset<br>✅ Member selections cleared<br>✅ API simulation states reset<br>✅ Agentic AI engine reset<br><br><strong>🎯 Ready for fresh start!</strong><br>Click 'Load from SNP' to reconnect to the database and begin agentic AI processing.", false);
+        }
+
+        // Initialize the application
+        initializeApp();
+    </script>
+</body>
+</html>
+                
